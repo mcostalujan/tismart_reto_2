@@ -6,6 +6,7 @@ import static org.springframework.http.HttpStatus.OK;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -92,7 +93,7 @@ public class EscuelaController {
 
     @PostMapping("/guardar")
     public ResponseEntity<Escuela> guardarEscuelaPorJson(@RequestBody EscuelaDto escuelaDto)
-            throws NumberFormatException, EscuelaException {
+            throws NumberFormatException, EscuelaException, ParseException {
 
         Escuela escuelaGuardada = this.escuelaService.guardarEscuela(escuelaDto);
 
@@ -108,7 +109,7 @@ public class EscuelaController {
             @RequestParam(value = "licenciada", required = false) Boolean licenciada,
             @RequestParam("clasificacion") String clasificacion,
             @RequestParam(value = "fechaRegistro", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date fechaRegistro,
-            @RequestParam("idFacultad") String idFacultad) throws NumberFormatException, EscuelaException {
+            @RequestParam("idFacultad") String idFacultad) throws NumberFormatException, EscuelaException, ParseException {
         EscuelaDto escuelaIntermediaria = new EscuelaDto(idEscuela, nombre, cantidadAlumnos, recursoFiscal, 
         licenciada, clasificacion, fechaRegistro, idFacultad);
         Escuela escuelaGuardada = this.escuelaService.guardarEscuela(escuelaIntermediaria);

@@ -16,7 +16,7 @@ public final class Utility {
     private Utility() {
     }
 
-    public static final String TIME_ZONE = "America/Lima";
+    public static final String TIME_ZONE = "UTC";
     public static final String DATE_FORMAT = "yyyy-MM-dd";
 
     public Date convertStringToDateWithTimeZone(String fecha) throws ParseException {

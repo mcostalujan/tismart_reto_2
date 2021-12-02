@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -62,7 +63,7 @@ public class ImplEscuelaService implements IEscuelaService {
     }
 
     @Override
-    public Escuela guardarEscuela(EscuelaDto escuelaDto) throws NumberFormatException, EscuelaException {
+    public Escuela guardarEscuela(EscuelaDto escuelaDto) throws NumberFormatException, EscuelaException, ParseException {
         if (validarEscuela(escuelaDto)) {
             Facultad facultadEncontrada = this.facultadDao.findByIdFacultad(Long.valueOf(escuelaDto.getIdFacultad()));
             Escuela escuelaNueva = new Escuela();

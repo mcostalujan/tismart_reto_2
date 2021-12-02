@@ -3,6 +3,7 @@ package maxcosta.reto2.service;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 
@@ -19,7 +20,7 @@ public interface IEscuelaService {
 
     public List<Escuela> buscarTodasLasEscuelas();
 
-    public Escuela guardarEscuela(EscuelaDto escuelaDto) throws NumberFormatException, EscuelaException;
+    public Escuela guardarEscuela(EscuelaDto escuelaDto) throws NumberFormatException, EscuelaException, ParseException;
 
     public void eliminarEscuela(Long idEscuela);
 

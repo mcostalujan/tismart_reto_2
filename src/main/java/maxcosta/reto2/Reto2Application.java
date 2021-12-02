@@ -2,7 +2,10 @@ package maxcosta.reto2;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.TimeZone;
 
+import javax.annotation.PostConstruct;
+import static maxcosta.reto2.utility.Utility.TIME_ZONE;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -13,6 +16,10 @@ import org.springframework.web.filter.CorsFilter;
 @SpringBootApplication
 public class Reto2Application {
 
+	@PostConstruct
+	public void init() {
+		TimeZone.setDefault(TimeZone.getTimeZone(TIME_ZONE));
+	}
 	public static void main(String[] args) {
 		SpringApplication.run(Reto2Application.class, args);
 	}
