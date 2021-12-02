@@ -272,7 +272,7 @@ public class EscuelaController {
 
     private ResponseEntity<HttpResponse> response(HttpStatus httpStatus, String message) {
         return new ResponseEntity<>(
-                new HttpResponse(httpStatus.value(), httpStatus, httpStatus.getReasonPhrase().toUpperCase(), message),
+                new HttpResponse(httpStatus.value(), httpStatus, httpStatus.getReasonPhrase(), message),
                 httpStatus);
     }
 
