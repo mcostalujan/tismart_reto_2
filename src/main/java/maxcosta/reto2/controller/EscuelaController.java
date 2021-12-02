@@ -45,8 +45,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import maxcosta.reto2.dto.EscuelaDto;
+import maxcosta.reto2.exception.domain.EscuelaException;
 import maxcosta.reto2.model.Escuela;
-import maxcosta.reto2.model.Facultad;
 import maxcosta.reto2.model.HttpResponse;
 import maxcosta.reto2.service.IEscuelaService;
 import maxcosta.reto2.service.IFacultadService;
@@ -77,6 +77,13 @@ public class EscuelaController {
         return new ResponseEntity<>(lista, OK);
     }
 
+    @GetMapping("/listar/fecha/{fechaRegistro}")
+    public ResponseEntity<List<Escuela>> obtenerTodosLosPagosPorIntervalo(
+            @PathVariable("fechaRegistro") @DateTimeFormat(pattern = "yyyy-MM-dd") Date fechaRegistro) {
+        List<Escuela> lista = this.escuelaService.buscarEscuelasPorFechaRegistro(fechaRegistro);
+        return new ResponseEntity<>(lista, OK);
+    }
+
     @GetMapping("/buscar/id/{id}")
     public ResponseEntity<Escuela> obtenerEscuelaPorId(@PathVariable("id") Long id) {
         Escuela escuelaEncontrada = this.escuelaService.buscarEscuelaPorId(id);
@@ -84,22 +91,10 @@ public class EscuelaController {
     }
 
     @PostMapping("/guardar")
-    public ResponseEntity<Escuela> guardarEscuelaPorJson(@RequestBody EscuelaDto escuelaDto) {
-        Escuela escuelaNueva = new Escuela();
-        Escuela escuelaGuardada = null;
-        Facultad facultadEncontrada = this.facultadService.buscarFacultadPorId(escuelaDto.getIdFacultad());
-        if (facultadEncontrada != null) {
-            if (escuelaDto.getIdEscuela() != null)
-                escuelaNueva.setIdEscuela(escuelaDto.getIdEscuela());
-            escuelaNueva.setCantidadAlumnos(escuelaDto.getCantidadAlumnos());
-            escuelaNueva.setClasificacion(escuelaDto.getClasificacion());
-            escuelaNueva.setFechaRegistro(escuelaDto.getFechaRegistro());
-            escuelaNueva.setLicenciada(escuelaDto.getLicenciada());
-            escuelaNueva.setNombre(escuelaDto.getNombre());
-            escuelaNueva.setRecursoFiscal(escuelaDto.getRecursoFiscal());
-            escuelaNueva.setFacultad(facultadEncontrada);
-            escuelaGuardada = this.escuelaService.guardarEscuela(escuelaNueva);
-        }
+    public ResponseEntity<Escuela> guardarEscuelaPorJson(@RequestBody EscuelaDto escuelaDto)
+            throws NumberFormatException, EscuelaException {
+
+        Escuela escuelaGuardada = this.escuelaService.guardarEscuela(escuelaDto);
 
         return new ResponseEntity<>(escuelaGuardada, OK);
     }
@@ -108,27 +103,15 @@ public class EscuelaController {
     public ResponseEntity<Escuela> guardarEscuelaPorForm(
             @RequestParam(value = "idEscuela", required = false) Long idEscuela,
             @RequestParam("nombre") String nombre,
-            @RequestParam("cantidadAlumnos") int cantidadAlumnos,
-            @RequestParam("recursoFiscal") float recursoFiscal,
-            @RequestParam("licenciada") Boolean licenciada,
-            @RequestParam("clasificacion") int clasificacion,
-            @RequestParam("fechaRegistro") @DateTimeFormat(pattern = "yyyy-MM-dd") Date fechaRegistro,
-            @RequestParam("idFacultad") Long idFacultad) {
-        Escuela escuelaNueva = new Escuela();
-        Escuela escuelaGuardada = null;
-        Facultad facultadEncontrada = this.facultadService.buscarFacultadPorId(idFacultad);
-        if (facultadEncontrada != null) {
-            if (idEscuela != null)
-                escuelaNueva = this.escuelaService.buscarEscuelaPorId(idEscuela);
-            escuelaNueva.setCantidadAlumnos(cantidadAlumnos);
-            escuelaNueva.setClasificacion(clasificacion);
-            escuelaNueva.setFechaRegistro(fechaRegistro);
-            escuelaNueva.setLicenciada(licenciada);
-            escuelaNueva.setNombre(nombre);
-            escuelaNueva.setRecursoFiscal(recursoFiscal);
-            escuelaNueva.setFacultad(facultadEncontrada);
-            escuelaGuardada = this.escuelaService.guardarEscuela(escuelaNueva);
-        }
+            @RequestParam("cantidadAlumnos") String cantidadAlumnos,
+            @RequestParam("recursoFiscal") String recursoFiscal,
+            @RequestParam(value = "licenciada", required = false) Boolean licenciada,
+            @RequestParam("clasificacion") String clasificacion,
+            @RequestParam(value = "fechaRegistro", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date fechaRegistro,
+            @RequestParam("idFacultad") String idFacultad) throws NumberFormatException, EscuelaException {
+        EscuelaDto escuelaIntermediaria = new EscuelaDto(idEscuela, nombre, cantidadAlumnos, recursoFiscal, 
+        licenciada, clasificacion, fechaRegistro, idFacultad);
+        Escuela escuelaGuardada = this.escuelaService.guardarEscuela(escuelaIntermediaria);
 
         return new ResponseEntity<>(escuelaGuardada, OK);
     }
@@ -142,10 +125,11 @@ public class EscuelaController {
     @GetMapping("/exportar/pdf/fecha/{fechaRegistro}")
     public ResponseEntity<InputStreamResource> exportarEscuelasPorFechaEnPdf(
             @PathVariable("fechaRegistro") @DateTimeFormat(pattern = "yyyy-MM-dd") Date fechaRegistro) {
+        String fechaRegistroConFormato = this.utility.convertirDateToStringWithFormat(fechaRegistro);
         String prefijo = this.utility.obtenerFechaActualConFormatoParaArchivos();
         List<Escuela> escuelasEncontradasPorFecha = this.escuelaService.buscarEscuelasPorFechaRegistro(fechaRegistro);
         ByteArrayInputStream bais = this.escuelaService
-                .exportarListaDeEscuelasPorFechaRegistro(escuelasEncontradasPorFecha);
+                .exportarListaDeEscuelasPorFechaRegistro(escuelasEncontradasPorFecha, fechaRegistroConFormato);
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Disposition", "inline; filename = " + prefijo + "_table.pdf");
         return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF)

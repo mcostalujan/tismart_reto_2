@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
+import maxcosta.reto2.dto.EscuelaDto;
+import maxcosta.reto2.exception.domain.EscuelaException;
 import maxcosta.reto2.model.Escuela;
 import maxcosta.reto2.model.EscuelaPopulation;
 
@@ -17,7 +19,7 @@ public interface IEscuelaService {
 
     public List<Escuela> buscarTodasLasEscuelas();
 
-    public Escuela guardarEscuela(Escuela escuela);
+    public Escuela guardarEscuela(EscuelaDto escuelaDto) throws NumberFormatException, EscuelaException;
 
     public void eliminarEscuela(Long idEscuela);
 
@@ -25,7 +27,7 @@ public interface IEscuelaService {
 
     public List<EscuelaPopulation> getTopPopulationEscuelasPorFecha(Date fechaRegistro);
 
-    public ByteArrayInputStream exportarListaDeEscuelasPorFechaRegistro(List<Escuela> escuelasEncontradasPorFecha);
+    public ByteArrayInputStream exportarListaDeEscuelasPorFechaRegistro(List<Escuela> escuelasEncontradasPorFecha, String fecha);
 
     public ByteArrayInputStream exportarBarchartDeEscuelasPorFechaRegistro(BufferedImage bufferedImage) throws IOException;
 

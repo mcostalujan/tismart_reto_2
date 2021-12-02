@@ -9,6 +9,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Stream;
 
+import javax.imageio.ImageIO;
+
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
@@ -16,25 +18,24 @@ import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
 import com.itextpdf.text.Font;
 import com.itextpdf.text.FontFactory;
+import com.itextpdf.text.Image;
 import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Phrase;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import javax.imageio.ImageIO;
-import com.itextpdf.text.Image;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javafx.embed.swing.SwingFXUtils;
 import maxcosta.reto2.dao.IEscuelaDao;
 import maxcosta.reto2.dao.IFacultadDao;
+import maxcosta.reto2.dto.EscuelaDto;
+import maxcosta.reto2.exception.domain.EscuelaException;
 import maxcosta.reto2.model.Escuela;
 import maxcosta.reto2.model.EscuelaPopulation;
+import maxcosta.reto2.model.Facultad;
 import maxcosta.reto2.service.IEscuelaService;
 import maxcosta.reto2.utility.Utility;
 
@@ -61,8 +62,33 @@ public class ImplEscuelaService implements IEscuelaService {
     }
 
     @Override
-    public Escuela guardarEscuela(Escuela escuela) {
-        return this.escuelaDao.save(escuela);
+    public Escuela guardarEscuela(EscuelaDto escuelaDto) throws NumberFormatException, EscuelaException {
+        if (validarEscuela(escuelaDto)) {
+            Facultad facultadEncontrada = this.facultadDao.findByIdFacultad(Long.valueOf(escuelaDto.getIdFacultad()));
+            Escuela escuelaNueva = new Escuela();
+            if (escuelaDto.getIdEscuela() != null)
+                escuelaNueva = this.escuelaDao.findByIdEscuela(escuelaDto.getIdEscuela());
+            escuelaNueva.setCantidadAlumnos(Integer.parseInt(escuelaDto.getCantidadAlumnos()));
+            escuelaNueva.setClasificacion(Integer.parseInt(escuelaDto.getClasificacion()));
+            escuelaNueva.setFacultad(facultadEncontrada);
+            escuelaNueva.setFechaRegistro(escuelaDto.getFechaRegistro());
+            escuelaNueva.setLicenciada(escuelaDto.getLicenciada());
+            escuelaNueva.setNombre(escuelaDto.getNombre());
+            escuelaNueva.setRecursoFiscal(Float.parseFloat(escuelaDto.getRecursoFiscal()));
+            return this.escuelaDao.save(escuelaNueva);
+        }
+        return null;
+    }
+
+    private boolean validarEscuela(EscuelaDto escuelaDto) throws EscuelaException {
+        Escuela escuelaTemporal = new Escuela();
+        return escuelaTemporal.validarCantidadAlumnos(escuelaDto.getCantidadAlumnos())
+                && escuelaTemporal.validarClasificacion(escuelaDto.getClasificacion())
+                && escuelaTemporal.validarFechaRegistro(escuelaDto.getFechaRegistro())
+                && escuelaTemporal.validarLicenciada(escuelaDto.getLicenciada())
+                && escuelaTemporal.validarNombre(escuelaDto.getNombre())
+                && escuelaTemporal.validarRecursoFiscal(escuelaDto.getRecursoFiscal())
+                && escuelaTemporal.validarIdentificadorFacultad(String.valueOf(escuelaDto.getIdFacultad()));
     }
 
     @Override
@@ -81,7 +107,8 @@ public class ImplEscuelaService implements IEscuelaService {
     }
 
     @Override
-    public ByteArrayInputStream exportarListaDeEscuelasPorFechaRegistro(List<Escuela> escuelasEncontradasPorFecha) {
+    public ByteArrayInputStream exportarListaDeEscuelasPorFechaRegistro(List<Escuela> escuelasEncontradasPorFecha,
+            String fecha) {
         Document document = new Document(PageSize.A4.rotate());
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try {
@@ -91,7 +118,7 @@ public class ImplEscuelaService implements IEscuelaService {
             // add text to pdf file
             com.itextpdf.text.Font font = com.itextpdf.text.FontFactory.getFont(FontFactory.COURIER, 14,
                     BaseColor.BLACK);
-            Paragraph paragraph = new Paragraph("Lista de escuelas", font);
+            Paragraph paragraph = new Paragraph("Lista de escuelas registradas en " + fecha, font);
             paragraph.setAlignment(Element.ALIGN_CENTER);
             document.add(paragraph);
             document.add(Chunk.NEWLINE);
@@ -220,30 +247,30 @@ public class ImplEscuelaService implements IEscuelaService {
     @Override
     public ByteArrayInputStream exportarPiechartDeEscuelasPorFechaRegistro(BufferedImage bufferedImage)
             throws IOException {
-                Document document = new Document(PageSize.A4.rotate());
-                ByteArrayOutputStream out = new ByteArrayOutputStream();
-                try {
-                    PdfWriter.getInstance(document, out);
-                    document.open();
-        
-                    // add text to pdf file
-                    com.itextpdf.text.Font font = com.itextpdf.text.FontFactory.getFont(FontFactory.COURIER, 14,
-                            BaseColor.BLACK);
-                    Paragraph paragraph = new Paragraph("Pie Chart", font);
-                    paragraph.setAlignment(Element.ALIGN_CENTER);
-                    document.add(paragraph);
-                    document.add(Chunk.NEWLINE);
-        
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    ImageIO.write(bufferedImage, "png", baos);
-                    Image img = Image.getInstance(baos.toByteArray());
-                    img.setAlignment(Element.ALIGN_CENTER);
-                    document.add(img);
-                    document.close();
-                } catch (DocumentException e) {
-                    e.printStackTrace();
-                }
-                return new ByteArrayInputStream(out.toByteArray());
+        Document document = new Document(PageSize.A4.rotate());
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try {
+            PdfWriter.getInstance(document, out);
+            document.open();
+
+            // add text to pdf file
+            com.itextpdf.text.Font font = com.itextpdf.text.FontFactory.getFont(FontFactory.COURIER, 14,
+                    BaseColor.BLACK);
+            Paragraph paragraph = new Paragraph("Pie Chart", font);
+            paragraph.setAlignment(Element.ALIGN_CENTER);
+            document.add(paragraph);
+            document.add(Chunk.NEWLINE);
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ImageIO.write(bufferedImage, "png", baos);
+            Image img = Image.getInstance(baos.toByteArray());
+            img.setAlignment(Element.ALIGN_CENTER);
+            document.add(img);
+            document.close();
+        } catch (DocumentException e) {
+            e.printStackTrace();
+        }
+        return new ByteArrayInputStream(out.toByteArray());
     }
 
 }

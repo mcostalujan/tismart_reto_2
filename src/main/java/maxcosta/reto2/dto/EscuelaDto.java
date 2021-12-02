@@ -14,11 +14,11 @@ import lombok.NoArgsConstructor;
 public class EscuelaDto {
     private Long idEscuela;
     private String nombre;
-    private int cantidadAlumnos;
-    private float recursoFiscal;
+    private String cantidadAlumnos;
+    private String recursoFiscal;
     private Boolean licenciada;
-    private int clasificacion;
+    private String clasificacion;
     @DateTimeFormat(pattern="yyyy-MM-dd")
     private Date fechaRegistro;
-    private Long idFacultad;
+    private String idFacultad;
 }
