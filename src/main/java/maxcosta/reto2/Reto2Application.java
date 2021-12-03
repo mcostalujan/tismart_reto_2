@@ -33,7 +33,7 @@ public class Reto2Application {
 		UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource = new UrlBasedCorsConfigurationSource();
 		CorsConfiguration corsConfiguration = new CorsConfiguration();
 		corsConfiguration.setAllowCredentials(true);
-		corsConfiguration.setAllowedOrigins(Collections.singletonList("https://maxcostareto2.web.app"));
+		corsConfiguration.setAllowedOrigins(Collections.singletonList("https://maxcostareto2tismart-42758.web.app"));
 		corsConfiguration.setAllowedHeaders(Arrays.asList("Origin", HEADER, "Content-Type", "Accept", "Jwt-Token",
 				"Authorization", "Origin, Accept", "X-Requested-With", "Access-Control-Request-Method",
 				"Access-Control-Request-Headers"));
