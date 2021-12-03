@@ -1,11 +1,13 @@
 package maxcosta.reto2;
 
+import static maxcosta.reto2.utility.Utility.TIME_ZONE;
+
 import java.util.Arrays;
-import java.util.List;
+import java.util.Collections;
 import java.util.TimeZone;
 
 import javax.annotation.PostConstruct;
-import static maxcosta.reto2.utility.Utility.TIME_ZONE;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -31,7 +33,7 @@ public class Reto2Application {
 		UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource = new UrlBasedCorsConfigurationSource();
 		CorsConfiguration corsConfiguration = new CorsConfiguration();
 		corsConfiguration.setAllowCredentials(false);
-		corsConfiguration.setAllowedOrigins(List.of("*"));
+		corsConfiguration.setAllowedOrigins(Collections.singletonList("http://localhost:4200"));
 		corsConfiguration.setAllowedHeaders(Arrays.asList("Origin", HEADER, "Content-Type", "Accept", "Jwt-Token",
 				"Authorization", "Origin, Accept", "X-Requested-With", "Access-Control-Request-Method",
 				"Access-Control-Request-Headers"));
